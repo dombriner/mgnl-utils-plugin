@@ -16,6 +16,9 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
+        <intentionAction>
+            <className>actions.XmlRemoveSystemPropertiesAction</className>
+        </intentionAction>
     </extensions>
 
     <actions>
