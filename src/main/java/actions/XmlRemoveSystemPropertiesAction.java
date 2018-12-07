@@ -1,13 +1,29 @@
 package actions;
 
 import com.intellij.codeInsight.intention.impl.BaseIntentionAction;
+import com.intellij.lang.ASTNode;
+import com.intellij.lang.FileASTNode;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.progress.ProgressIndicatorProvider;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.xml.XmlAttribute;
+import com.intellij.psi.xml.XmlTag;
 import com.intellij.util.IncorrectOperationException;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
+import util.MgnlUtil;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+import static util.FileUtil.isFileType;
 
 public class XmlRemoveSystemPropertiesAction extends BaseIntentionAction {
 
@@ -29,15 +45,38 @@ public class XmlRemoveSystemPropertiesAction extends BaseIntentionAction {
 
     @Override
     public boolean isAvailable(@NotNull Project project, Editor editor, PsiFile file) {
-        return isXmlFile(file);
+        return isFileType(file, "xml");
     }
 
     @Override
     public void invoke(@NotNull Project project, Editor editor, PsiFile file) throws IncorrectOperationException {
+        ArrayList<ASTNode> propertyNodes = new ArrayList<>();
+        Set<String> systemPropertyNames = new HashSet<>();
 
-    }
 
-    private boolean isXmlFile(PsiFile file) {
-        return file.getVirtualFile().getExtension().toLowerCase().equals("xml") || file.getFileType().getDefaultExtension().toLowerCase().equals("xml");
+        PsiRecursiveElementWalkingVisitor fileVisitor = new PsiRecursiveElementWalkingVisitor() {
+            @Override
+            public void visitElement(final PsiElement element) {
+                super.visitElement(element);
+                ASTNode node = element.getNode();
+                if (node instanceof XmlTag) {
+                    XmlTag tag = (XmlTag) node;
+                    if (tag.getName().equals("sv:property")) {
+                        if (tag.getAttribute("sv:name") instanceof XmlAttribute) {
+                            XmlAttribute name = (XmlAttribute) tag.getAttribute("sv:name");
+                            if (MgnlUtil.isSystemProperty(name.getValue())) {
+                                propertyNodes.add(node);
+                                systemPropertyNames.add(name.getValue());
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        fileVisitor.visitFile(file);
+
+        System.out.println(systemPropertyNames.size());
+        System.out.println(propertyNodes.size());
     }
 }
