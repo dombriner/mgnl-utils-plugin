@@ -95,8 +95,8 @@ public class ChooseValues extends JDialog {
         labelConstrains.setColumn(0);
 
         GridConstraints checkBoxConstraints = new GridConstraints();
-        labelConstrains.setRow(0);
-        labelConstrains.setColumn(1);
+        checkBoxConstraints.setRow(0);
+        checkBoxConstraints.setColumn(1);
 
         panel.add(valueLabel, labelConstrains);
         panel.add(valueChosen, checkBoxConstraints);
