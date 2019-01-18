@@ -4,9 +4,12 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.intellij.uiDesigner.core.GridConstraints.ANCHOR_NORTHWEST;
 
 public class ChooseValues extends JDialog {
     private JPanel contentPane;
@@ -76,30 +79,21 @@ public class ChooseValues extends JDialog {
         int row = 0;
         for (String value : values) {
             GridConstraints valueConstraint = new GridConstraints();
+            valueConstraint.setAnchor(ANCHOR_NORTHWEST);
             valueConstraint.setRow(row);
             propertiesPanel.add(createValuePanel(value), valueConstraint, row);
             row++;
         }
     }
 
-    private JPanel createValuePanel(String value) {
-        JPanel panel = new JPanel();
-        GridLayoutManager layoutManager = new GridLayoutManager(1, 2);
-        panel.setLayout(layoutManager);
+    private Container createValuePanel(String value) {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        JCheckBox valueChosen = new JCheckBox();
+        panel.add(valueChosen);
 
         JLabel valueLabel = new JLabel(value);
-        JCheckBox valueChosen = new JCheckBox();
-
-        GridConstraints labelConstrains = new GridConstraints();
-        labelConstrains.setRow(0);
-        labelConstrains.setColumn(0);
-
-        GridConstraints checkBoxConstraints = new GridConstraints();
-        checkBoxConstraints.setRow(0);
-        checkBoxConstraints.setColumn(1);
-
-        panel.add(valueLabel, labelConstrains);
-        panel.add(valueChosen, checkBoxConstraints);
+        panel.add(valueLabel);
 
         return panel;
     }
