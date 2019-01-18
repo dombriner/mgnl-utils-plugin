@@ -17,6 +17,7 @@ public class ChooseValues extends JDialog {
     private JButton buttonCancel;
     private JPanel propertiesPanel;
     private List<String> values;
+    private List<ValueRow> valueRows = new ArrayList<>();
 
     public ChooseValues(List<String> values) {
         this.values = values;
@@ -50,6 +51,15 @@ public class ChooseValues extends JDialog {
                 onCancel();
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    }
+
+    public ArrayList<String> getChosenValues() {
+        ArrayList<String> chosenVals = new ArrayList<>();
+        for (ValueRow valueRow : valueRows) {
+            if (valueRow.chosen())
+                chosenVals.add(valueRow.getValue());
+        }
+        return chosenVals;
     }
 
     private void onOK() {
@@ -87,14 +97,36 @@ public class ChooseValues extends JDialog {
     }
 
     private Container createValuePanel(String value) {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        ValueRow valueRow = new ValueRow(value);
+        valueRows.add(valueRow);
+        return valueRow.getPanel();
+    }
 
-        JCheckBox valueChosen = new JCheckBox();
-        panel.add(valueChosen);
+    private class ValueRow {
+        JPanel panel;
+        JCheckBox chosen;
+        JLabel valueLabel;
 
-        JLabel valueLabel = new JLabel(value);
-        panel.add(valueLabel);
+        public ValueRow(String value) {
+            panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        return panel;
+            chosen = new JCheckBox();
+            panel.add(chosen);
+
+            valueLabel = new JLabel(value);
+            panel.add(valueLabel);
+        }
+
+        public Container getPanel() {
+            return panel;
+        }
+
+        public boolean chosen() {
+            return chosen.isSelected();
+        }
+
+        public String getValue() {
+            return valueLabel.getText();
+        }
     }
 }
