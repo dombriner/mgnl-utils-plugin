@@ -10,6 +10,7 @@ import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.util.IncorrectOperationException;
+import dialogs.ChooseValuesDialog;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import util.MgnlUtil;
@@ -71,7 +72,10 @@ public class XmlRemoveSystemPropertiesAction extends BaseIntentionAction {
 
         fileVisitor.visitFile(file);
 
-        System.out.println(systemPropertyNames.size());
-        System.out.println(propertyNodes.size());
+        ChooseValuesDialog choosePropertiesDialog = new ChooseValuesDialog(systemPropertyNames, project);
+        choosePropertiesDialog.pack();
+//        choosePropertiesDialog.setVisible(true);
+//
+//        if (choosePropertiesDialog.getExitCode())
     }
 }

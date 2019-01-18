@@ -1,27 +1,31 @@
 package dialogs;
 
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import static com.intellij.uiDesigner.core.GridConstraints.ANCHOR_NORTHWEST;
 
-public class ChooseValues extends JDialog {
+public class ChooseValuesDialog extends DialogWrapper {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
     private JPanel propertiesPanel;
-    private List<String> values;
-    private List<ValueRow> valueRows = new ArrayList<>();
+    private Collection<String> values;
+    private Collection<ValueRow> valueRows = new ArrayList<>();
 
-    public ChooseValues(List<String> values) {
+    public ChooseValuesDialog(Collection<String> values, Project project) {
+        super(project);
         this.values = values;
-        setContentPane(contentPane);
+        //setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
 
@@ -37,6 +41,7 @@ public class ChooseValues extends JDialog {
             }
         });
 
+        /*
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
@@ -44,6 +49,7 @@ public class ChooseValues extends JDialog {
                 onCancel();
             }
         });
+        */
 
         // call onCancel() on ESCAPE
         contentPane.registerKeyboardAction(new ActionListener() {
@@ -77,13 +83,17 @@ public class ChooseValues extends JDialog {
         list.add("One");
         list.add("Two");
         list.add("Three");
-        ChooseValues dialog = new ChooseValues(list);
+        ChooseValuesDialog dialog = new ChooseValuesDialog(list, null);
         dialog.pack();
-        dialog.setVisible(true);
+        dialog.init();
+        dialog.show();
         System.exit(0);
     }
 
-    private void createUIComponents() {
+
+    @Nullable
+    @Override
+    protected JComponent createCenterPanel() {
         propertiesPanel = new JPanel();
         propertiesPanel.setLayout(new GridLayoutManager(values.size(), 1));
         int row = 0;
@@ -94,6 +104,12 @@ public class ChooseValues extends JDialog {
             propertiesPanel.add(createValuePanel(value), valueConstraint, row);
             row++;
         }
+
+        return propertiesPanel;
+    }
+
+    private void createUIComponents() {
+        createCenterPanel();
     }
 
     private Container createValuePanel(String value) {
