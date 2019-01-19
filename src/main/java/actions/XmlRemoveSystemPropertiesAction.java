@@ -46,7 +46,7 @@ public class XmlRemoveSystemPropertiesAction extends BaseIntentionAction {
 
     @Override
     public void invoke(@NotNull Project project, Editor editor, PsiFile file) throws IncorrectOperationException {
-        ArrayList<ASTNode> propertyNodes = new ArrayList<>();
+        ArrayList<XmlTag> propertyTags = new ArrayList<>();
         Set<String> systemPropertyNames = new HashSet<>();
 
 
@@ -54,14 +54,13 @@ public class XmlRemoveSystemPropertiesAction extends BaseIntentionAction {
             @Override
             public void visitElement(final PsiElement element) {
                 super.visitElement(element);
-                ASTNode node = element.getNode();
-                if (node instanceof XmlTag) {
-                    XmlTag tag = (XmlTag) node;
+                if (element instanceof XmlTag) {
+                    XmlTag tag = (XmlTag) element;
                     if (tag.getName().equals("sv:property")) {
                         if (tag.getAttribute("sv:name") instanceof XmlAttribute) {
-                            XmlAttribute name = (XmlAttribute) tag.getAttribute("sv:name");
+                            XmlAttribute name = tag.getAttribute("sv:name");
                             if (MgnlUtil.isSystemProperty(name.getValue())) {
-                                propertyNodes.add(node);
+                                propertyTags.add(tag);
                                 systemPropertyNames.add(name.getValue());
                             }
                         }
@@ -74,8 +73,19 @@ public class XmlRemoveSystemPropertiesAction extends BaseIntentionAction {
 
         ChooseValuesDialog choosePropertiesDialog = new ChooseValuesDialog(systemPropertyNames, project);
         choosePropertiesDialog.pack();
-//        choosePropertiesDialog.setVisible(true);
-//
-//        if (choosePropertiesDialog.getExitCode())
+        if (!choosePropertiesDialog.showAndGet())
+            return;
+
+        ArrayList<String> chosenProperties = choosePropertiesDialog.getChosenValues();
+        for (XmlTag propTag:propertyTags) {
+            try {
+                if (chosenProperties.contains(propTag.getAttribute("sv:name").getValue()))
+                    propTag.delete();
+            }
+            // Deletion not possible
+            catch (IncorrectOperationException exc) {
+                exc.printStackTrace();
+            }
+        }
     }
 }

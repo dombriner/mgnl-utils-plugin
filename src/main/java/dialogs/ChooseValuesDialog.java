@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -25,38 +24,9 @@ public class ChooseValuesDialog extends DialogWrapper {
     public ChooseValuesDialog(Collection<String> values, Project project) {
         super(project);
         this.values = values;
-        //setContentPane(contentPane);
+        init();
+        createValuePanels();
         setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
-
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
-
-        buttonCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
-
-        /*
-        // call onCancel() when cross is clicked
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-        });
-        */
-
-        // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     public ArrayList<String> getChosenValues() {
@@ -78,24 +48,23 @@ public class ChooseValuesDialog extends DialogWrapper {
         dispose();
     }
 
-    public static void main(String[] args) {
-        ArrayList<String> list = new ArrayList<>();
-        list.add("One");
-        list.add("Two");
-        list.add("Three");
-        ChooseValuesDialog dialog = new ChooseValuesDialog(list, null);
-        dialog.pack();
-        dialog.init();
-        dialog.show();
-        System.exit(0);
-    }
-
-
     @Nullable
     @Override
     protected JComponent createCenterPanel() {
+        return propertiesPanel;
+    }
+
+    private void createUIComponents() {
         propertiesPanel = new JPanel();
-        propertiesPanel.setLayout(new GridLayoutManager(values.size(), 1));
+    }
+
+    private void createValuePanels() {
+        if (propertiesPanel == null)
+            createUIComponents();
+        if (valueRows == null)
+            valueRows = new ArrayList<>();
+        GridLayoutManager layout = new GridLayoutManager(this.values.size(), 1);
+        propertiesPanel.setLayout(layout);
         int row = 0;
         for (String value : values) {
             GridConstraints valueConstraint = new GridConstraints();
@@ -104,12 +73,6 @@ public class ChooseValuesDialog extends DialogWrapper {
             propertiesPanel.add(createValuePanel(value), valueConstraint, row);
             row++;
         }
-
-        return propertiesPanel;
-    }
-
-    private void createUIComponents() {
-        createCenterPanel();
     }
 
     private Container createValuePanel(String value) {
