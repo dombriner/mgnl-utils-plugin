@@ -17,11 +17,12 @@ dependencies {
 }
 
 intellij {
-    version '2018.1.6'
-    intellij.updateSinceUntilBuild false //Disables updating since-build attribute in plugin.xml
+//    version 'LATEST-EAP-SNAPSHOT' // Is default anyways
+    intellij.updateSinceUntilBuild false //Enables updating since/until-build attribute in plugin.xml
 }
-patchPluginXml {
-    changeNotes """
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>"""
-}
+//patchPluginXml {
+//    changeNotes """
+//      Add change notes here.<br>
+//      <em>most HTML tags may be used</em>"""
+//    sinceBuild '162.*'
+//}
