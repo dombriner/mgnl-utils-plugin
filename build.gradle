@@ -18,6 +18,7 @@ dependencies {
 
 intellij {
     version '2018.1.6'
+    intellij.updateSinceUntilBuild false //Disables updating since-build attribute in plugin.xml
 }
 patchPluginXml {
     changeNotes """

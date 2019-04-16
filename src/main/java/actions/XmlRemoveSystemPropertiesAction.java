@@ -55,7 +55,7 @@ public class XmlRemoveSystemPropertiesAction extends BaseIntentionAction {
         Set<String> systemPropertyNames = new TreeSet<>(String::compareToIgnoreCase);
 
         collectSystemPropertyTags(file, propertyTags, systemPropertyNames);
-        ChooseValuesDialog choosePropertiesDialog = new ChooseValuesDialog(systemPropertyNames, project);
+        ChooseValuesDialog choosePropertiesDialog = new ChooseValuesDialog(systemPropertyNames, project, false, "remove-xml-system-property");
         choosePropertiesDialog.pack();
 
         // Return iff dialog was cancelled
