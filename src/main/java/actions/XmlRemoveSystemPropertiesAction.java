@@ -5,6 +5,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -21,7 +22,7 @@ import java.util.*;
 
 import static util.FileUtil.isFileType;
 
-public class XmlRemoveSystemPropertiesAction extends BaseIntentionAction {
+public class XmlRemoveSystemPropertiesAction extends BaseIntentionAction implements DumbAware {
 
     private static final Logger LOG = Logger.getInstance(XmlRemoveSystemPropertiesAction.class);
     private final String message = "Remove system properties...";
@@ -61,7 +62,7 @@ public class XmlRemoveSystemPropertiesAction extends BaseIntentionAction {
                     Set<String> systemPropertyNames = new TreeSet<>(String::compareToIgnoreCase);
 
                     collectSystemPropertyTags(file, propertyTags, systemPropertyNames);
-                    ChooseValuesDialog choosePropertiesDialog = new ChooseValuesDialog(systemPropertyNames, project, false, "remove-xml-system-property");
+                    ChooseValuesDialog choosePropertiesDialog = new ChooseValuesDialog(systemPropertyNames, project, true, "remove-xml-system-property");
                     choosePropertiesDialog.pack();
 
                     // Return iff dialog was cancelled

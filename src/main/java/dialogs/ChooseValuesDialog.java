@@ -29,13 +29,14 @@ public class ChooseValuesDialog extends DialogWrapper {
 
     public ChooseValuesDialog(Collection<String> values, Project project, boolean save, @Nullable String savePrefix) {
         super(project);
+        this.project = project;
         this.values = values;
         this.save = save;
+        if (!isEmpty(savePrefix))
+            this.savePrefix += "-" + savePrefix;
         init();
         createValuePanels();
         setModal(true);
-        if (!isEmpty(savePrefix))
-            this.savePrefix += "-" + savePrefix;
     }
 
 
