@@ -1,3 +1,14 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+    }
+
+//    dependencies {
+//        classpath "org.jetbrains.plugins:yaml"
+//    }
+}
+
 plugins {
     id 'java'
     id 'org.jetbrains.intellij' version '0.3.12'
@@ -14,11 +25,14 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+//    compileClasspath "org.jetbrains.plugins:ideaIU-LATEST-EAP-SNAPSHOT"
 }
 
 intellij {
-//    version 'LATEST-EAP-SNAPSHOT' // Is default anyways
+    version 'IU-LATEST-EAP-SNAPSHOT' // Is default anyways
     intellij.updateSinceUntilBuild false //Enables updating since/until-build attribute in plugin.xml
+    type 'IU'
+    plugins 'yaml'
 }
 //patchPluginXml {
 //    changeNotes """

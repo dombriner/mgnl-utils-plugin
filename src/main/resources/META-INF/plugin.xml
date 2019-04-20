@@ -14,6 +14,7 @@
     <!-- uncomment to enable plugin in all products
     <depends>com.intellij.modules.lang</depends>
     -->
+    <depends optional="false">org.jetbrains.plugins.yaml</depends>
 
     <idea-version since-build="162"/>
 
@@ -21,6 +22,9 @@
         <!-- Add your extensions here -->
         <intentionAction>
             <className>actions.XmlRemoveSystemPropertiesAction</className>
+        </intentionAction>
+        <intentionAction>
+            <className>actions.YmlRemoveSystemPropertiesAction</className>
         </intentionAction>
     </extensions>
 
