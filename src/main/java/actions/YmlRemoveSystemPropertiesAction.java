@@ -41,7 +41,7 @@ public class YmlRemoveSystemPropertiesAction extends RemoveChosenElementsAction 
 
     @Override
     protected String getSavePrefix() {
-        return "remove-yml-system-property";
+        return "remove-system-property";
     }
 
     @Override

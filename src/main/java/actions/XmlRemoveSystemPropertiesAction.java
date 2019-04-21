@@ -43,7 +43,7 @@ public class XmlRemoveSystemPropertiesAction extends RemoveChosenElementsAction 
 
     @Override
     protected String getSavePrefix() {
-        return "remove-xml-system-property";
+        return "remove-system-property";
     }
 
     @Override
