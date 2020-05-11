@@ -15,10 +15,7 @@ import dialogs.ChooseValuesDialog;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 public abstract class OperateOnChosenElementsAction extends BaseIntentionAction implements DumbAware {
 
@@ -80,8 +77,22 @@ public abstract class OperateOnChosenElementsAction extends BaseIntentionAction 
 
                     ArrayList<String> chosenElementIds = chooseElementsDialog.getChosenValues();
 
-                    operateOnChosenElements(chosenElementIds, choosableElements);
+                    List<PsiElement> chosenElements = getChosenElements(choosableElements, chosenElementIds);
+                    choosableElements.clear();
+
+                    operateOnChosenElements(chosenElements);
                 });
+    }
+
+    private List<PsiElement> getChosenElements(ArrayList<PsiElement> choosableElements, ArrayList<String> chosenElementIds) {
+        ArrayList<PsiElement> chosenElements = new ArrayList<>();
+
+        for (PsiElement element : choosableElements) {
+            if (chosenElementIds.contains(getIdentifier(element)))
+                chosenElements.add(element);
+        }
+
+        return chosenElements;
     }
 
     /**
@@ -118,19 +129,9 @@ public abstract class OperateOnChosenElementsAction extends BaseIntentionAction 
     protected abstract boolean isChoosable(final PsiElement element);
 
     /**
-     * Calls {@link #operateOn(PsiElement)} on all elements in @param elements whose identifier is in @param chosenElementIds
-     *
-     * @param chosenElementIds The identifiers which were chosen by the user
-     * @param elements         The elements which may be operateOn, depending on whether the user selects them
+     * Calls {@link #operateOn(PsiElement)} on all elements in @param chosenElement in a single WriteActionCommand
      */
-    protected void operateOnChosenElements(ArrayList<String> chosenElementIds, ArrayList<PsiElement> elements) {
-        ArrayList<PsiElement> chosenElements = new ArrayList<>();
-
-        for (PsiElement element : elements) {
-            if (chosenElementIds.contains(getIdentifier(element)))
-                chosenElements.add(element);
-        }
-
+    protected void operateOnChosenElements(List<PsiElement> chosenElements) {
         WriteCommandAction.runWriteCommandAction(project, () -> {
             for (PsiElement chosen : chosenElements) {
                 operateOn(chosen);
