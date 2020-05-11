@@ -102,7 +102,6 @@ public abstract class OperateOnChosenElementsAction extends BaseIntentionAction 
                     choosableElementIds.add(getIdentifier(element));
                 }
             }
-
         };
 
         LOG.debug("Looking for choosable elements in " + file.getName() + "...");
@@ -121,14 +120,20 @@ public abstract class OperateOnChosenElementsAction extends BaseIntentionAction 
     /**
      * Calls {@link #operateOn(PsiElement)} on all elements in @param elements whose identifier is in @param chosenElementIds
      *
-     * @param chosenElementIds  The identifiers which were chosen by the user
-     * @param elements          The elements which may be operateOn, depending on whether the user selects them
+     * @param chosenElementIds The identifiers which were chosen by the user
+     * @param elements         The elements which may be operateOn, depending on whether the user selects them
      */
     protected void operateOnChosenElements(ArrayList<String> chosenElementIds, ArrayList<PsiElement> elements) {
+        ArrayList<PsiElement> chosenElements = new ArrayList<>();
+
+        for (PsiElement element : elements) {
+            if (chosenElementIds.contains(getIdentifier(element)))
+                chosenElements.add(element);
+        }
+
         WriteCommandAction.runWriteCommandAction(project, () -> {
-            for (PsiElement element : elements) {
-                if (chosenElementIds.contains(getIdentifier(element)))
-                    operateOn(element);
+            for (PsiElement chosen : chosenElements) {
+                operateOn(chosen);
             }
         });
     }
