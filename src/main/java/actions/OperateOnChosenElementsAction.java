@@ -41,6 +41,8 @@ public abstract class OperateOnChosenElementsAction extends BaseIntentionAction 
         return false;
     }
 
+    protected int performantFileTextLengthLimit = 32767;
+
     /**
      * @return whether or not the choices of the user should be saved for the next invocation of this action
      */
@@ -70,21 +72,36 @@ public abstract class OperateOnChosenElementsAction extends BaseIntentionAction 
                     ChooseValuesDialog chooseElementsDialog = new ChooseValuesDialog(choosableElementsIds, project, saveChoices(), getSavePrefix());
                     chooseElementsDialog.pack();
 
-                    // Return iff dialog was cancelled
+                    // Return if dialog was cancelled
                     if (!chooseElementsDialog.showAndGet())
                         return;
 
-
+                    // List of elements the user wants to remove
                     ArrayList<String> chosenElementIds = chooseElementsDialog.getChosenValues();
 
-                    List<PsiElement> chosenElements = getChosenElements(choosableElements, chosenElementIds);
-                    choosableElements.clear();
-
-                    operateOnChosenElements(chosenElements);
+                    operateOnElements(choosableElements, chosenElementIds, file);
                 });
     }
 
-    private List<PsiElement> getChosenElements(ArrayList<PsiElement> choosableElements, ArrayList<String> chosenElementIds) {
+    protected void operateOnElements(ArrayList<PsiElement> choosableElements, ArrayList<String> chosenElementIds, PsiFile file) {
+        if (useSerialization(file))
+            for (String chosenElementId : chosenElementIds)
+                findAndOperateOnChosenElements(choosableElements, Collections.singletonList(chosenElementId));
+        else
+            findAndOperateOnChosenElements(choosableElements, chosenElementIds);
+    }
+
+    protected void findAndOperateOnChosenElements(List<PsiElement> choosableElements, List<String> chosenElementIds) {
+        List<PsiElement> chosenElements = getChosenElements(choosableElements, chosenElementIds);
+
+        operateOnChosenElements(chosenElements);
+    }
+
+    protected boolean useSerialization(PsiFile file) {
+        return file.getTextLength() > performantFileTextLengthLimit;
+    }
+
+    protected List<PsiElement> getChosenElements(List<PsiElement> choosableElements, List<String> chosenElementIds) {
         ArrayList<PsiElement> chosenElements = new ArrayList<>();
 
         for (PsiElement element : choosableElements) {
