@@ -41,7 +41,7 @@ public abstract class OperateOnChosenElementsAction extends BaseIntentionAction 
         return false;
     }
 
-    protected int psiElementArraySizeLimit = 10;
+    protected int psiElementArraySizeLimit = 500;
 
     /**
      * @return whether or not the choices of the user should be saved for the next invocation of this action
