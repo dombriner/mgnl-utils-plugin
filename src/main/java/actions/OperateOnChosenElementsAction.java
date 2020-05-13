@@ -41,7 +41,7 @@ public abstract class OperateOnChosenElementsAction extends BaseIntentionAction 
         return false;
     }
 
-    protected int performantFileTextLengthLimit = 32767;
+    protected int psiElementArraySizeLimit = 10;
 
     /**
      * @return whether or not the choices of the user should be saved for the next invocation of this action
@@ -84,21 +84,37 @@ public abstract class OperateOnChosenElementsAction extends BaseIntentionAction 
     }
 
     protected void operateOnElements(ArrayList<PsiElement> choosableElements, ArrayList<String> chosenElementIds, PsiFile file) {
-        if (useSerialization(file))
-            for (String chosenElementId : chosenElementIds)
-                findAndOperateOnChosenElements(choosableElements, Collections.singletonList(chosenElementId));
-        else
+        if (!choosableElements.isEmpty())
             findAndOperateOnChosenElements(choosableElements, chosenElementIds);
+
+        else {
+            for (String chosenElementId : chosenElementIds) {
+                ArrayList<PsiElement> elementsToOperateOn = new ArrayList<>();
+                PsiRecursiveElementWalkingVisitor fileVisitor = new PsiRecursiveElementWalkingVisitor() {
+                    @Override
+                    public void visitElement(@NotNull final PsiElement element) {
+                        super.visitElement(element);
+                        if (isChoosable(element) &&
+                                chosenElementId.equals(getIdentifier(element)) &&
+                                elementsToOperateOn.size() < psiElementArraySizeLimit)
+                            elementsToOperateOn.add(element);
+                    }
+                };
+                fileVisitor.visitElement(file);
+                while (!elementsToOperateOn.isEmpty()) {
+                    operateOnElements(elementsToOperateOn);
+                    elementsToOperateOn.clear();
+                    fileVisitor.visitElement(file);
+                }
+            }
+
+        }
     }
 
     protected void findAndOperateOnChosenElements(List<PsiElement> choosableElements, List<String> chosenElementIds) {
         List<PsiElement> chosenElements = getChosenElements(choosableElements, chosenElementIds);
 
-        operateOnChosenElements(chosenElements);
-    }
-
-    protected boolean useSerialization(PsiFile file) {
-        return file.getTextLength() > performantFileTextLengthLimit;
+        operateOnElements(chosenElements);
     }
 
     protected List<PsiElement> getChosenElements(List<PsiElement> choosableElements, List<String> chosenElementIds) {
@@ -121,12 +137,15 @@ public abstract class OperateOnChosenElementsAction extends BaseIntentionAction 
      * @param choosableElementIds Collection to put the system properties in
      */
     protected void collectChoosableElements(PsiFile file, Collection<PsiElement> choosableElements, Collection<String> choosableElementIds) {
+        Collection<PsiElement> finalChoosableElements = choosableElements;
+
         PsiRecursiveElementWalkingVisitor fileVisitor = new PsiRecursiveElementWalkingVisitor() {
             @Override
-            public void visitElement(final PsiElement element) {
+            public void visitElement(@NotNull final PsiElement element) {
                 super.visitElement(element);
                 if (isChoosable(element)) {
-                    choosableElements.add(element);
+                    if (finalChoosableElements.size() < psiElementArraySizeLimit)
+                        finalChoosableElements.add(element);
                     choosableElementIds.add(getIdentifier(element));
                 }
             }
@@ -134,8 +153,12 @@ public abstract class OperateOnChosenElementsAction extends BaseIntentionAction 
 
         LOG.debug("Looking for choosable elements in " + file.getName() + "...");
         fileVisitor.visitFile(file);
-        LOG.debug(choosableElements.size() + " elements found with " + choosableElementIds.size() + " different "
-                + "identifiers found in file " + file + ".");
+        if (finalChoosableElements.size() < psiElementArraySizeLimit)
+            choosableElements.addAll(finalChoosableElements);
+        else
+            choosableElements.clear();
+        LOG.debug((choosableElements.isEmpty() ? "Over " + psiElementArraySizeLimit : String.valueOf(choosableElements.size())) +
+                " elements found with " + choosableElementIds.size() + " different identifiers found in file " + file + ".");
     }
 
 
@@ -148,7 +171,7 @@ public abstract class OperateOnChosenElementsAction extends BaseIntentionAction 
     /**
      * Calls {@link #operateOn(PsiElement)} on all elements in @param chosenElement in a single WriteActionCommand
      */
-    protected void operateOnChosenElements(List<PsiElement> chosenElements) {
+    protected void operateOnElements(List<PsiElement> chosenElements) {
         WriteCommandAction.runWriteCommandAction(project, () -> {
             for (PsiElement chosen : chosenElements) {
                 operateOn(chosen);
