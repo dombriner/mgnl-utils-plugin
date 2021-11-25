@@ -7,7 +7,7 @@ public class FileUtil {
 
     public static boolean isFileType(@Nullable PsiFile file,@Nullable String extension) {
         try {
-            return file.getFileType().getDefaultExtension().toLowerCase().equals(extension.toLowerCase()) || extension.toLowerCase().equals(file.getVirtualFile().getExtension().toLowerCase());
+            return file.getFileType().getDefaultExtension().equalsIgnoreCase(extension) || extension.equalsIgnoreCase(file.getVirtualFile().getExtension());
         } catch(NullPointerException npe) {
             return false;
         }

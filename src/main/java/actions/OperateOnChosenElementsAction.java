@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class OperateOnChosenElementsAction extends BaseIntentionAction implements DumbAware {
 
@@ -44,8 +45,13 @@ public abstract class OperateOnChosenElementsAction extends BaseIntentionAction 
         return false;
     }
 
+    @Override
+    public boolean startInWriteAction() {
+        return false;
+    }
+
     /**
-     * @return whether or not the choices of the user should be saved for the next invocation of this action
+     * @return whether the choices of the user should be saved for the next invocation of this action
      */
     protected boolean saveChoices() {
         return true;
@@ -62,26 +68,31 @@ public abstract class OperateOnChosenElementsAction extends BaseIntentionAction 
     @Override
     public void invoke(@NotNull Project project, Editor editor, PsiFile file) throws IncorrectOperationException {
         this.project = project;
-        ApplicationManager.getApplication().invokeLater(
-                () -> {
-                    // List of elements the user may remove
-                    ArrayList<PsiElement> choosableElements = new ArrayList<>();
-                    // List of IDs to display to the user as selectable options
-                    Set<String> choosableElementsIds = new TreeSet<>(String::compareToIgnoreCase);
+        // List of elements the user may remove
+        ArrayList<PsiElement> choosableElements = new ArrayList<>();
+        // List of IDs to display to the user as selectable options
+        Set<String> choosableElementsIds = new TreeSet<>(String::compareToIgnoreCase);
+        ApplicationManager.getApplication().runReadAction(() ->
+                collectChoosableElements(file, choosableElements, choosableElementsIds));
 
-                    collectChoosableElements(file, choosableElements, choosableElementsIds);
+        ArrayList<String> chosenElementIds = getChosenElementIds(choosableElementsIds, project);
+
+        if (chosenElementIds == null || chosenElementIds.isEmpty())
+            return;
+        operateOnChosenElements(chosenElementIds, choosableElements);
+    }
+
+    protected ArrayList<String> getChosenElementIds(Set<String> choosableElementsIds, Project project) {
+        AtomicReference<ArrayList<String>> chosenElementIds = new AtomicReference<>(new ArrayList<String>());
                     ChooseValuesDialog chooseElementsDialog = new ChooseValuesDialog(choosableElementsIds, project, saveChoices(), getSavePrefix());
                     chooseElementsDialog.pack();
 
                     // Return iff dialog was cancelled
                     if (!chooseElementsDialog.showAndGet())
-                        return;
+                        return new ArrayList<>();
 
-
-                    ArrayList<String> chosenElementIds = chooseElementsDialog.getChosenValues();
-
-                    operateOnChosenElements(chosenElementIds, choosableElements);
-                });
+                    chosenElementIds.set(chooseElementsDialog.getChosenValues());
+        return chosenElementIds.get();
     }
 
     /**
@@ -125,10 +136,10 @@ public abstract class OperateOnChosenElementsAction extends BaseIntentionAction 
      * @param elements          The elements which may be operateOn, depending on whether the user selects them
      */
     protected void operateOnChosenElements(ArrayList<String> chosenElementIds, ArrayList<PsiElement> elements) {
+        elements.removeIf(element -> !chosenElementIds.contains(getIdentifier(element)));
         WriteCommandAction.runWriteCommandAction(project, () -> {
             for (PsiElement element : elements) {
-                if (chosenElementIds.contains(getIdentifier(element)))
-                    operateOn(element);
+                operateOn(element);
             }
         });
     }

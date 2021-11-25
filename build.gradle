@@ -1,25 +1,31 @@
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '0.3.12'
+    id 'org.jetbrains.intellij' version '1.2.1'
 }
 
 group 'ch.dombriner'
 version '1.1.1-SNAPSHOT'
 
-sourceCompatibility = 1.8
+sourceCompatibility = 1.11
 
 repositories {
     mavenCentral()
+    gradlePluginPortal()
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }
 
+// See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version 'LATEST-EAP-SNAPSHOT' // Is default anyways
-    intellij.updateSinceUntilBuild false //Enables updating since/until-build attribute in plugin.xml
-    plugins 'yaml'
+    version = 'LATEST-EAP-SNAPSHOT' // Is default anyways
+    intellij.updateSinceUntilBuild=  false //Enables updating since/until-build attribute in plugin.xml
+    plugins = ['yaml', 'com.intellij.java']
+}
+test {
+    useJUnitPlatform()
 }
 //patchPluginXml {
 //    changeNotes """
