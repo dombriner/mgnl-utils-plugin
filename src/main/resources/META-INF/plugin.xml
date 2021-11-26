@@ -1,11 +1,12 @@
 <idea-plugin>
     <id>ch.dombriner.mgnl-utils-plugin</id>
-    <name>Plugin display name here</name>
-    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+    <name>Magnolia Utils Plugin</name>
+    <vendor email="dominik.briner@hotmail.com" url="http://www.yourcompany.com">D.Briner</vendor>
 
     <description><![CDATA[
-    Enter short description for your plugin here.<br>
-    <em>most HTML tags may be used</em>
+    A plugin aiming at facilitating development for the Magnolia CMS .<br>
+    If you have any feature suggestions, encounter any bugs or have questions, please contact
+    <em>dominik.briner@hotmail.de</em>
     ]]></description>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
@@ -13,11 +14,17 @@
     <!-- uncomment to enable plugin in all products
     <depends>com.intellij.modules.lang</depends>
     -->
+    <depends optional="false">org.jetbrains.plugins.yaml</depends>
+
+    <idea-version since-build="162"/>
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
         <intentionAction>
             <className>actions.XmlRemoveSystemPropertiesAction</className>
+        </intentionAction>
+        <intentionAction>
+            <className>actions.YmlRemoveSystemPropertiesAction</className>
         </intentionAction>
     </extensions>
 

@@ -1,5 +1,6 @@
 package dialogs;
 
+import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.uiDesigner.core.GridConstraints;
@@ -11,7 +12,9 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static base.Constants.PLUGIN_NAME;
 import static com.intellij.uiDesigner.core.GridConstraints.ANCHOR_NORTHWEST;
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 public class ChooseValuesDialog extends DialogWrapper {
     private JPanel contentPane;
@@ -20,13 +23,24 @@ public class ChooseValuesDialog extends DialogWrapper {
     private JPanel propertiesPanel;
     private Collection<String> values;
     private Collection<ValueRow> valueRows = new ArrayList<>();
+    private boolean save = false;
+    private String savePrefix = PLUGIN_NAME;
+    private PropertiesComponent propSaver = PropertiesComponent.getInstance();
 
-    public ChooseValuesDialog(Collection<String> values, Project project) {
+    public ChooseValuesDialog(Collection<String> values, Project project, boolean save, @Nullable String savePrefix) {
         super(project);
         this.values = values;
+        this.save = save;
+        if (!isEmpty(savePrefix))
+            this.savePrefix += "-" + savePrefix;
         init();
         createValuePanels();
         setModal(true);
+    }
+
+
+    public ChooseValuesDialog(Collection<String> values, Project project) {
+        this(values, project, false, null);
     }
 
     public ArrayList<String> getChosenValues() {
@@ -38,14 +52,23 @@ public class ChooseValuesDialog extends DialogWrapper {
         return chosenVals;
     }
 
-    private void onOK() {
-        // add your code here
-        dispose();
+    @Override
+    protected void doOKAction() {
+        super.doOKAction();
+        if (save && isOKActionEnabled())
+            saveChoices();
     }
 
-    private void onCancel() {
-        // add your code here if necessary
-        dispose();
+    private void saveChoices() {
+        if (save) {
+            for (ValueRow valueRow : valueRows) {
+                propSaver.setValue(getSavePropertyName(valueRow.getValue()), valueRow.chosen());
+            }
+        }
+    }
+
+    private String getSavePropertyName(String value) {
+        return savePrefix + "-" + value;
     }
 
     @Nullable
@@ -76,7 +99,8 @@ public class ChooseValuesDialog extends DialogWrapper {
     }
 
     private Container createValuePanel(String value) {
-        ValueRow valueRow = new ValueRow(value);
+        boolean chosen = save && propSaver.getBoolean(getSavePropertyName(value), false);
+        ValueRow valueRow = new ValueRow(value, chosen);
         valueRows.add(valueRow);
         return valueRow.getPanel();
     }
@@ -86,14 +110,19 @@ public class ChooseValuesDialog extends DialogWrapper {
         JCheckBox chosen;
         JLabel valueLabel;
 
-        public ValueRow(String value) {
+        public ValueRow(String value, boolean ticked) {
             panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
             chosen = new JCheckBox();
+            chosen.setSelected(ticked);
             panel.add(chosen);
 
             valueLabel = new JLabel(value);
             panel.add(valueLabel);
+        }
+
+        public ValueRow(String value) {
+            this(value, false);
         }
 
         public Container getPanel() {

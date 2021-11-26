@@ -1,10 +1,15 @@
 package util;
 
 import com.intellij.psi.PsiFile;
+import org.jetbrains.annotations.Nullable;
 
 public class FileUtil {
 
-    public static boolean isFileType(PsiFile file, String extension) {
-        return file.getFileType().getDefaultExtension().toLowerCase().equals(extension.toLowerCase()) || file.getVirtualFile().getExtension().toLowerCase().equals(extension.toLowerCase());
+    public static boolean isFileType(@Nullable PsiFile file,@Nullable String extension) {
+        try {
+            return file.getFileType().getDefaultExtension().equalsIgnoreCase(extension) || extension.equalsIgnoreCase(file.getVirtualFile().getExtension());
+        } catch(NullPointerException npe) {
+            return false;
+        }
     }
 }
