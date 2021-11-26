@@ -21,6 +21,7 @@ import static com.intellij.patterns.PlatformPatterns.psiElement;
  * $type support? $type does not work, only class
  * lists don't work - i.e. in WorkbenchDefinition, List<ContentViewDefinition> will break it, not giving the
  * ContentViewDefinition fields for the elements of the yaml list
+ * Make limit (and therefore performance) configurable and maybe even add option to disable completion contributor
  */
 public class DefinitionsClassBasedCompleter extends CompletionContributor {
 
