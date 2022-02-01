@@ -4,17 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NullClassInformation extends ClassInformation {
-    private String name;
-    private String qualifiedClass;
-    private List<NullClassInformation> properties;
 
     public NullClassInformation() {
-        super("", "", new ArrayList<>(), );
-    }
-
-    @Override
-    public void setName(String name) {
-        throw new UnsupportedOperationException();
+        super("", "", new ArrayList<>());
     }
 
     @Override
@@ -23,7 +15,12 @@ public class NullClassInformation extends ClassInformation {
     }
 
     @Override
-    public void setProperties(List<ClassInformation> properties) {
+    public void setType(String type) {
+        super.setType(type);
+    }
+
+    @Override
+    public void setProperties(List<Property> properties) {
         throw new UnsupportedOperationException();
     }
 }

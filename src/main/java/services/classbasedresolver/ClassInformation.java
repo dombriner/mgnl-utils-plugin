@@ -4,37 +4,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ClassInformation {
-    private String name;
     private String qualifiedClass;
-    private List<ClassInformation> properties = new ArrayList<>();
-    private PropertyType type;
+    private String type;
+    private List<Property> properties = new ArrayList<>();
+
+    private ClassInformation(String qualifiedClass) {
+        this(qualifiedClass, null);
+    }
 
     // TODO: Builder
-    public ClassInformation(String name, String qualifiedClass) {
-        this(name, qualifiedClass, new ArrayList<>());
+    public ClassInformation(String qualifiedClass, String type) {
+        this(qualifiedClass, type, new ArrayList<>());
     }
 
-    public ClassInformation(String name, String qualifiedClass, List<ClassInformation> properties) {
-        this(name, qualifiedClass, properties, null);
-    }
-
-    public ClassInformation(String name, String qualifiedClass, List<ClassInformation> properties, PropertyType type) {
-        this.name = name;
+    public ClassInformation(String qualifiedClass, String type, List<Property> properties) {
         this.qualifiedClass = qualifiedClass;
-        this.properties = properties;
         this.type = type;
+        this.properties = properties;
     }
 
-    public void addProperty(ClassInformation property) {
+    public void addProperty(Property property) {
         properties.add(property);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getQualifiedClass() {
@@ -45,19 +35,19 @@ public class ClassInformation {
         this.qualifiedClass = qualifiedClass;
     }
 
-    public List<ClassInformation> getProperties() {
-        return properties;
-    }
-
-    public void setProperties(List<ClassInformation> properties) {
-        this.properties = properties;
-    }
-
-    public PropertyType getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(PropertyType type) {
+    public void setType(String type) {
         this.type = type;
+    }
+
+    public List<Property> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(List<Property> properties) {
+        this.properties = properties;
     }
 }
