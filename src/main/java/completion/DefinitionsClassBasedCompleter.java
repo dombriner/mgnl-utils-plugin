@@ -2,6 +2,8 @@ package completion;
 
 import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
@@ -12,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.yaml.YAMLElementTypes;
 import org.jetbrains.yaml.psi.YAMLKeyValue;
 import com.intellij.openapi.util.Pair;
+import services.classbasedresolver.ClassBasedResolver;
 
 import static com.intellij.patterns.PlatformPatterns.psiElement;
 
@@ -36,32 +39,40 @@ public class DefinitionsClassBasedCompleter extends CompletionContributor {
     }
 
     public class DefinitionsClassCompletionProvider extends CompletionProvider<CompletionParameters> {
-        public DefinitionsClassCompletionProvider() {}
+        ClassBasedResolver classBasedResolver;
+
+        public DefinitionsClassCompletionProvider() {
+            classBasedResolver = ApplicationManager.getApplication().getService(ClassBasedResolver.class);
+        }
 
         @Override
         protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-            PsiElement position = parameters.getPosition();
-            Pair<YAMLKeyValue, String> classElement = getClassElement(position.getParent(), 5, "");
-            if (classElement == null || classElement.getFirst() == null)
-                return;
+            try {
+                PsiElement position = parameters.getPosition();
+                Pair<YAMLKeyValue, String> classElement = getClassElement(position.getParent(), 5, "");
+                if (classElement == null || classElement.getFirst() == null)
+                    return;
 
-            String classClassifier = classElement.getFirst().getValueText();
-            String path = classElement.getSecond();
+                String classClassifier = classElement.getFirst().getValueText();
+                String path = classElement.getSecond();
 
-            Project project = position.getProject();
+                Project project = position.getProject();
 
-            PsiClass definitionClass = JavaPsiFacade.getInstance(project).findClass(classClassifier, GlobalSearchScope.allScope(project));
+                PsiClass definitionClass = JavaPsiFacade.getInstance(project).findClass(classClassifier, GlobalSearchScope.allScope(project));
 
-            if (definitionClass == null)
-                return;
+                if (definitionClass == null)
+                    return;
 
-            PsiClass realClass = navigateToClass(definitionClass, path);
+                PsiClass realClass = navigateToClass(definitionClass, path);
 
-            if (realClass == null)
-                return;
+                if (realClass == null)
+                    return;
 
-            for (PsiField field : realClass.getAllFields()) {
-                result.addElement(LookupElementBuilder.create(field.getName()));
+                for (PsiField field : realClass.getAllFields()) {
+                    result.addElement(LookupElementBuilder.create(field.getName()));
+                }
+            } catch(ProcessCanceledException exception) {
+                throw new ProcessCanceledException(exception);
             }
         }
 

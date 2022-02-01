@@ -1,6 +1,5 @@
 package util;
 
-import com.intellij.psi.PsiFile;
 
 public class MgnlUtil {
 
